@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: rgba(205, 81, 68, 0.24);
+    color: #000000;
+  }
+
+  /* Respect users who prefer reduced motion. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Subtle topographic line texture used behind the hero + footer. */
+  .topo {
+    background-image: radial-gradient(
+        1200px 600px at 70% -10%,
+        rgba(205, 81, 68, 0.20),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px 500px at 10% 20%,
+        rgba(199, 178, 147, 0.16),
+        transparent 55%
+      );
+  }
+
+  /* Focus ring used across interactive elements for consistent a11y. */
+  .focus-ring {
+    @apply outline-none ring-offset-2 ring-offset-paper focus-visible:ring-2 focus-visible:ring-brick;
+  }
+}
