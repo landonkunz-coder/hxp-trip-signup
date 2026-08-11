@@ -4,8 +4,8 @@ A small, polished, mobile-first public sign-up site for a single HXP humanitaria
 expedition. A prospective Builder can read the trip details and submit an
 application that is validated and sanitized on the server before it's stored.
 
-- **Live site:** _<add your Vercel URL here after deploy>_
-- **Repo:** _<add your GitHub URL here>_
+- **Live site:** https://scenario-2-microsite.vercel.app
+- **Repo:** https://github.com/landonkunz-coder/hxp-trip-signup
 
 Built AI-assisted, on purpose — see [AI Workflow](#ai-workflow) for which model did
 what and why, and one example of AI output I rejected.
