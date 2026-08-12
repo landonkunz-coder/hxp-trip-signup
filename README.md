@@ -25,6 +25,22 @@ what and why, and one example of AI output I rejected.
   and the CTA, form, and confirmation adapt automatically (this is also the
   Round-2 resilience story — see below).
 
+## Design — a deliberate "field-note" identity
+
+The visual language is built to feel handcrafted and mission-driven, not like default
+framework styling:
+
+- **Typography:** Zilla Slab (a sturdy slab-serif) for headings and body, paired with
+  Caveat (handwritten) for human accents — trip scribbles, photo captions, "at a glance."
+- **Palette:** warm parchment/cream, terracotta (`#cd5144`), sand, and gold — one
+  coherent, earthy set that reads like an expedition field journal, not corporate SaaS.
+- **Motifs from a travel journal:** a taped Polaroid hero photo, numbered wax-seal
+  badges, dashed "field-note" cards, a topographic contour texture, and a woven top stripe.
+- **Motion:** sections fade and rise in on scroll (Framer Motion) over Lenis smooth
+  scrolling — all gated behind `prefers-reduced-motion`.
+- **Mobile-first:** the phone layout is the primary design — the two-column hero stacks,
+  the Polaroid scales, tap targets stay large, and nothing is a squished afterthought.
+
 ## Tech stack & why
 
 | Choice | Why |
@@ -34,7 +50,7 @@ what and why, and one example of AI output I rejected.
 | **Zod** | One schema (`lib/validation.ts`) shared by client and server, so validation can't drift between them. The server is authoritative. |
 | **Supabase (Postgres)** | Managed Postgres with an official, parameterized client — no hand-built SQL, no injection surface. Swappable (see `lib/persistence.ts`). |
 | **Cloudflare Turnstile** | Free, privacy-friendly CAPTCHA alternative for the public endpoint. Optional and off by default. |
-| **Self-hosted fonts** (`@fontsource-variable/*`) | Fraunces (display) + Inter (body) vendored via npm — **zero runtime requests to Google**, which keeps the CSP tight and the page fast. |
+| **Self-hosted fonts** (`@fontsource/*`) | Zilla Slab (slab-serif display + body) + Caveat (handwritten accents) vendored via npm — **zero runtime requests to Google**, which keeps the CSP tight and the page fast. |
 | **Vercel** | HTTPS, env-var management, and instant deploys for the serverless route. |
 
 ## Project structure
@@ -120,9 +136,12 @@ an example of AI output I rejected. Here's the honest delegation.
 
 | Stage | Model (under the hood) | Why that model |
 | --- | --- | --- |
-| Architecture, all code, the security endpoint, iterative fixes, and the build/runtime verification | **Claude Opus** (driving via Cowork / a Claude-Code-style agent) | Frontier reasoning for security-sensitive, multi-file code where correctness and coherence matter most. |
+| Architecture, all code, the security endpoint, iterative fixes, and build/runtime verification | **Claude Opus** (driving via a Claude-Code-style agent) | Frontier reasoning for security-sensitive, multi-file code where correctness and coherence matter most. |
 | **Independent adversarial security + code review** of the endpoint and form | **Claude Sonnet** (separate sub-agent, fresh context) | A cheaper, fast model is plenty for a focused review pass — and running it as a *separate* agent with no memory of the build makes it a genuine second opinion, not the author grading their own work. |
-| Copy refinement + a **cross-provider** security second opinion | **ChatGPT** (OpenAI — free-tier default model) | Different provider = different failure modes; good for prose and for catching what one model family misses. Method + prompts: [`docs/chatgpt-prompts.md`](docs/chatgpt-prompts.md). |
+| **Design benchmark** — compare the first build against the real HXP site (`destinations.hxp.org`) and pitch a slicker direction + scroll polish | **ChatGPT / GPT-5** (OpenAI, via browser) | A different provider for an independent design critique — pressure-testing the look instead of grading my own taste. Method + prompts: [`docs/chatgpt-prompts.md`](docs/chatgpt-prompts.md). |
+| **Design exploration** — three distinct landing-page concepts as standalone HTML mockups, to choose a direction before touching the app | **Claude Opus** (agent) | Fast divergent visual options; cheaper to iterate on throwaway mockups than on the live component tree. |
+| **"Crafted" restyle build** — implement the chosen concept across every section + re-verify the production build | **Claude Opus** (agent) | Multi-file, design-system-consistent edits with a build check after each batch. |
+| Copy refinement + a **cross-provider** security second opinion | **ChatGPT** (OpenAI free tier) | Different provider = different failure modes; good for prose and for catching what one model family misses. |
 
 **Why split it this way:** the expensive model does the work where a mistake is
 costly (auth/validation/secret handling); the cheap model does the bounded,
@@ -131,13 +150,13 @@ would have missed the review findings below.
 
 ### AI output I rejected / corrected (real examples from this build)
 
-1. **Rejected: Google-hosted fonts.** The first pass wired `next/font/google`
-   (Fraunces + Inter). I rejected it for two reasons: it adds a third-party
-   origin (`fonts.gstatic.com`) to the render path — against the goal of
-   minimizing external origins for a PII page — and it failed to build in a
-   locked-down/offline environment. **Fix:** vendored the same fonts via
-   `@fontsource-variable/*` (self-hosted from npm), so there are **zero runtime
-   font requests** and the CSP stays `font-src 'self'`.
+1. **Rejected: Google-hosted fonts.** The first pass wired `next/font/google`. I
+   rejected it for two reasons: it adds a third-party origin (`fonts.gstatic.com`)
+   to the render path — against the goal of minimizing external origins for a PII
+   page — and it failed to build in a locked-down/offline environment. **Fix:**
+   vendored the fonts via `@fontsource/*` (self-hosted from npm — the final faces
+   are Zilla Slab + Caveat), so there are **zero runtime font requests** and
+   `font-src` stays `'self'`.
 
 2. **Corrected by the Sonnet review: a Turnstile lock-out.** My initial
    `verifyTurnstile` skipped verification only when the *secret* was missing. The
@@ -171,6 +190,14 @@ would have missed the review findings below.
    custom-header + Origin/Referer CSRF approach is sound rather than inventing a
    reason to add tokens.
 
+6. **Rejected: the AI's first "slicker" redesign kept the wrong hero.** When I
+   asked an agent to make the site more polished, its first pass kept a dark,
+   full-bleed photo hero and just layered accents on top — not the light,
+   parchment, taped-Polaroid concept I'd picked from the mockups. I rejected it
+   and had the agent **fully rewrite the hero** to match the chosen "Crafted"
+   concept, then verified it against the mockup with a screenshot before
+   continuing. Picking the direction was my call; the model executed it.
+
 The full Sonnet review (findings + what I fixed vs. deferred) is summarized in
 the [Security](#security) section.
 
@@ -201,7 +228,9 @@ read by a security reviewer.
 - **Nonce-based CSP.** The CSP currently allows `'unsafe-inline'` on `script-src`
   (required by Next's inline bootstrap without a nonce). A middleware that injects
   a per-request nonce would let me drop `'unsafe-inline'` — the single biggest CSP
-  upgrade. Called out as known debt in `next.config.js`.
+  upgrade. Called out as known debt in `next.config.js`. (`'unsafe-eval'` is added
+  **only in dev** for Next's Fast Refresh — production `script-src` never includes
+  it, which you can confirm in the response headers of the live site.)
 - **Distributed rate limiting.** The limiter is an in-memory `Map`, so under
   serverless horizontal scaling the *global* limit is looser than configured and
   resets on redeploy. Move to Upstash Redis / Vercel KV for a real cross-instance
@@ -241,11 +270,36 @@ support.
 
 ## What I cut for the time box
 
-- Real hero *photography* (used a designed CSS/SVG treatment instead — reliable,
-  on-brand, and one fewer external origin). Swapping in art-directed images is a
-  small change.
+- **Art-directed / owned photography.** The hero uses a single sepia-toned stock
+  photo (Unsplash) in a taped-Polaroid frame, and the CSP `img-src` is scoped to
+  exactly that one origin (`images.unsplash.com`). Swapping in HXP's own trip
+  photography is a drop-in change — and would let me tighten `img-src` back to `'self'`.
 - An admin view of submissions (out of scope; the data model + RLS note are ready
   for it).
+
+## What I'd do next
+
+The build is deliberately data-driven (`data/trip.ts` is the single source of truth),
+so these are content/direction passes, not rewrites:
+
+1. **Make the trip facts real and accurate.** The dates, price, "what's included /
+   not included," and itinerary are representative placeholders. I'd replace them with
+   the actual figures for the real trip — verified against HXP's own trip page — so
+   nothing on the page overstates or misstates what a Builder is signing up for.
+
+2. **Re-tone the copy toward HXP's mission, not a travel pitch.** Today it leans a
+   little toward "come on a cool trip." I'd rewrite the hero, highlights, and itinerary
+   to center what a Builder actually *gains*: growing their faith and walking with God,
+   serving alongside and building real relationships with the host community, and
+   experiencing a new culture first-hand. The service and the people become the
+   headline; the destination is the backdrop. That's the shift that makes the page feel
+   unmistakably like HXP rather than a generic expedition brand.
+
+3. **Re-run the design pass on the new copy.** The field-note visual system stays; the
+   words carry the mission. (Then a fresh accessibility + mobile check on the new content.)
+
+Security hardening I'd prioritize is tracked separately under
+[Security → What I'd harden next](#what-id-harden-next-with-more-time).
 
 ## Deployment
 
