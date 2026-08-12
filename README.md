@@ -139,6 +139,15 @@ alter table public.signups enable row level security;
 The brief asks for **at least two different models used at different points**, and
 an example of AI output I rejected. Here's the honest delegation.
 
+**Agents & tooling.** The build was driven through an agentic coding tool — Claude's
+Cowork agent (a Claude Code–style agent loop) — with **Claude Opus** as the primary
+model handling architecture, all code, and the security endpoint. A **separate Claude
+Sonnet sub-agent** with fresh context ran the independent security review, so the
+reviewer had no memory of writing the code it was critiquing. **ChatGPT / GPT-5** was
+used directly in the browser for the design benchmark against the real HXP site and a
+cross-provider code review. The table below maps each task to the model running under
+the hood and why I delegated it there.
+
 | Stage | Model (under the hood) | Why that model |
 | --- | --- | --- |
 | Architecture, all code, the security endpoint, iterative fixes, and build/runtime verification | **Claude Opus** (driving via a Claude-Code-style agent) | Frontier reasoning for security-sensitive, multi-file code where correctness and coherence matter most. |
