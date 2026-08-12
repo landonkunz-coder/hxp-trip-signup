@@ -74,9 +74,10 @@ The widget renders and the server verifies only when **both** are set.
 
 **Send HXP 2–3 one-hour slots** in the next few days. Fill these in:
 
-- Slot A: `<day, date — time–time, timezone>`
-- Slot B: `<day, date — time–time, timezone>`
-- Slot C: `<day, date — time–time, timezone>`
+- Slot A: Thursday, Aug 13 — 9:00–10:00 AM MT
+- Slot B: Thursday, Aug 13 — 12:00–1:00 PM MT
+- Slot C: Thursday, Aug 13 — 3:00–4:00 PM MT
+- (Flexible all day Thursday, Aug 13, Mountain Time — happy to take another window.)
 
 **When the change request arrives, here's where it lives:**
 

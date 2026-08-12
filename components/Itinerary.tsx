@@ -15,7 +15,7 @@ export function Itinerary({ trip }: { trip: Trip }) {
           <li key={day.title} className="group relative flex gap-5 sm:gap-8">
             {/* Rail */}
             <div className="flex flex-col items-center">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brick/30 bg-white font-display text-sm font-semibold text-brick shadow-sm">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-card bg-brick font-display text-base font-bold text-white shadow-[0_4px_9px_rgba(150,50,40,0.3)]">
                 {i + 1}
               </div>
               {i < trip.itinerary.length - 1 && (

@@ -1,34 +1,32 @@
 import type { Trip } from "@/data/trip";
 import { SectionHeading } from "@/components/SectionHeading";
-import { ShieldIcon, UsersIcon, CheckIcon, PinIcon } from "@/components/Icons";
-
-const ICONS = [CheckIcon, UsersIcon, PinIcon, ShieldIcon];
 
 export function Highlights({ trip }: { trip: Trip }) {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
+    <section id="why" className="mx-auto max-w-6xl scroll-mt-8 px-6 py-16 sm:px-8 sm:py-20">
       <SectionHeading
-        eyebrow="Why HXP"
-        title="A trip that means something — for them and for you"
+        eyebrow="Why build with HXP"
+        title="You bring the willingness. We bring everything else."
         intro="We've run humanitarian expeditions for years. Here's what makes a Builder trip different from voluntourism."
       />
 
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {trip.highlights.map((h, i) => {
-          const Icon = ICONS[i % ICONS.length];
-          return (
-            <div
-              key={h.title}
-              className="group rounded-2xl border border-ink/8 bg-white p-6 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brick/10 text-brick transition-colors group-hover:bg-brick group-hover:text-white">
-                <Icon className="h-6 w-6" />
-              </div>
-              <h3 className="mt-5 font-display text-lg font-semibold text-ink">{h.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink/65">{h.description}</p>
-            </div>
-          );
-        })}
+      <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {trip.highlights.map((h, i) => (
+          <div
+            key={h.title}
+            className={`group relative rounded-lg border border-sand bg-card p-6 pt-8 shadow-card transition duration-200 hover:-translate-y-1 hover:rotate-0 hover:shadow-lift ${
+              i % 2 ? "rotate-[1.1deg]" : "-rotate-[1.1deg]"
+            }`}
+          >
+            <span className="absolute -top-4 left-6 flex h-11 w-11 items-center justify-center rounded-full border-2 border-card bg-brick font-display text-lg font-bold text-white shadow-[0_4px_9px_rgba(150,50,40,0.35)]">
+              {i + 1}
+            </span>
+            <h3 className="isolate mt-2 inline-block font-display text-lg font-bold text-ink">
+              <span className="hl">{h.title}</span>
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-ink/70">{h.description}</p>
+          </div>
+        ))}
       </div>
     </section>
   );

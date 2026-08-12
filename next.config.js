@@ -6,9 +6,11 @@
 // documented next hardening step in the README. Everything else is locked down.
 const ContentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+  // 'unsafe-eval' is added ONLY in dev (Next.js Fast Refresh needs it).
+  // Production stays strict — no 'unsafe-eval'.
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV !== "production" ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://images.unsplash.com",
   "font-src 'self' data:",
   "connect-src 'self' https://challenges.cloudflare.com",
   "frame-src https://challenges.cloudflare.com",

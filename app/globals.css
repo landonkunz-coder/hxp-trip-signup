@@ -35,21 +35,57 @@
 
 @layer components {
   /* Subtle topographic line texture used behind the hero + footer. */
+  /* Topographic contour texture — HXP's signature background motif. */
   .topo {
-    background-image: radial-gradient(
-        1200px 600px at 70% -10%,
-        rgba(205, 81, 68, 0.20),
-        transparent 60%
-      ),
-      radial-gradient(
-        900px 500px at 10% 20%,
-        rgba(199, 178, 147, 0.16),
-        transparent 55%
-      );
+    background-image:
+      repeating-radial-gradient(circle at 12% 18%, transparent 0 24px, rgba(120, 72, 44, 0.07) 24px 25px, transparent 25px 49px),
+      repeating-radial-gradient(circle at 88% 72%, transparent 0 28px, rgba(120, 72, 44, 0.05) 28px 29px, transparent 29px 57px);
+    background-size: 520px 520px, 640px 640px;
+    background-attachment: fixed;
+  }
+  .topo-dark {
+    background-image:
+      repeating-radial-gradient(circle at 15% 20%, transparent 0 22px, rgba(255, 255, 255, 0.05) 22px 23px, transparent 23px 45px),
+      repeating-radial-gradient(circle at 85% 75%, transparent 0 26px, rgba(255, 255, 255, 0.04) 26px 27px, transparent 27px 53px);
+    background-size: 540px 540px, 660px 660px;
   }
 
   /* Focus ring used across interactive elements for consistent a11y. */
   .focus-ring {
     @apply outline-none ring-offset-2 ring-offset-paper focus-visible:ring-2 focus-visible:ring-brick;
+  }
+
+  /* Chunky, pressable terracotta button (Concept 3). */
+  .btn-chunky {
+    @apply inline-flex items-center justify-center gap-2 rounded border-2 border-brickdeep bg-brick px-7 py-3.5 text-base font-bold text-white transition;
+    box-shadow: 0 4px 0 #a63a30, 0 10px 18px rgba(120, 50, 40, 0.22);
+  }
+  .btn-chunky:hover {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #a63a30, 0 6px 12px rgba(120, 50, 40, 0.24);
+  }
+
+  /* Gold highlighter behind a word. Parent needs `isolate`. */
+  .hl {
+    position: relative;
+    white-space: nowrap;
+  }
+  .hl::after {
+    content: "";
+    position: absolute;
+    left: -0.05em;
+    right: -0.05em;
+    bottom: 0.06em;
+    height: 0.18em;
+    background: #d9b877;
+    opacity: 0.75;
+    transform: skewX(-8deg);
+    z-index: -1;
+  }
+
+  /* Woven terracotta stripe across the very top of the page. */
+  .topline {
+    height: 6px;
+    background: repeating-linear-gradient(90deg, #cd5144 0 22px, #a63a30 22px 44px);
   }
 }

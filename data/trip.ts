@@ -16,6 +16,7 @@ export interface ItineraryDay {
   label: string;
   title: string;
   description: string;
+  image?: { id: string; alt: string };
 }
 
 export interface Highlight {
@@ -29,6 +30,7 @@ export interface Trip {
   tagline: string;
   destination: string;
   country: string;
+  heroImage?: { id: string; alt: string };
   startDate: string; // ISO yyyy-mm-dd
   endDate: string; // ISO yyyy-mm-dd
   durationLabel: string;
@@ -51,6 +53,10 @@ export const trips: Record<string, Trip> = {
     tagline: "Twelve days building alongside an island community in the South Pacific.",
     destination: "Efate Island, Vanuatu",
     country: "Vanuatu",
+    heroImage: {
+      id: "photo-1507525428034-b723cf961d3e",
+      alt: "Sunrise over a turquoise South Pacific lagoon and palm-lined beach",
+    },
     startDate: "2027-02-06",
     endDate: "2027-02-18",
     durationLabel: "12 days",

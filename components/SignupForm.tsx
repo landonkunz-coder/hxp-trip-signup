@@ -302,7 +302,7 @@ export function SignupForm({ trip }: { trip: Trip }) {
       <button
         type="submit"
         disabled={submitting}
-        className="group mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brick px-6 py-3.5 text-base font-semibold text-white shadow-lift transition hover:bg-[#b4463b] focus:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-70"
+        className="btn-chunky group mt-6 w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:cursor-not-allowed disabled:opacity-70"
       >
         {submitting ? (
           <>

@@ -9,15 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Inter Variable"', "system-ui", "sans-serif"],
-        display: ['"Fraunces Variable"', "Georgia", "serif"],
+        sans: ['"Zilla Slab"', "Georgia", "serif"],
+        display: ['"Zilla Slab"', "Georgia", "serif"],
+        hand: ['"Caveat Variable"', "cursive"],
       },
       colors: {
-        // HXP brand palette — ONLY these four colors.
-        ink: "#000000", // black — text + dark surfaces (hero, footer)
-        paper: "#ffffff", // white — page background, text on dark
-        sand: "#c7b293", // warm tan — secondary surfaces, borders, warm accents
-        brick: "#cd5144", // terracotta — the single accent (CTAs, badges, marks)
+        // HXP "crafted" palette — warm parchment + slab-serif world.
+        ink: "#3a2b1e", // warm dark brown — text + dark surfaces
+        paper: "#ffffff", // white — form inputs / crisp cards
+        cream: "#f0e5cf", // parchment — page background
+        card: "#fbf5e6", // warm card surface
+        sand: "#cdb994", // hand-drawn line / border tone
+        brick: "#cd5144", // terracotta accent
+        brickdeep: "#a63a30", // deep terracotta — shadows, borders
+        gold: "#d9b877", // gold highlighter accent
       },
       boxShadow: {
         card: "0 1px 2px rgba(14,28,24,0.04), 0 8px 30px rgba(14,28,24,0.08)",
