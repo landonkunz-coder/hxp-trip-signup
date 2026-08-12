@@ -38,8 +38,13 @@ framework styling:
   badges, dashed "field-note" cards, a topographic contour texture, and a woven top stripe.
 - **Motion:** sections fade and rise in on scroll (Framer Motion) over Lenis smooth
   scrolling — all gated behind `prefers-reduced-motion`.
-- **Mobile-first:** the phone layout is the primary design — the two-column hero stacks,
-  the Polaroid scales, tap targets stay large, and nothing is a squished afterthought.
+- **Clean on every screen — desktop and mobile alike.** The layout is fully responsive:
+  the desktop view is spacious and polished, and on a phone it reflows just as cleanly —
+  the hero stacks into a clear vertical story (handwritten scribble → slab headline →
+  dashed detail chips → chunky CTA → the taped Polaroid), the nav condenses to the logo
+  plus one "Apply to join" button, the form becomes one comfortable column with large tap
+  targets, and the wax-seal cards and itinerary rail reflow without crowding. Both views
+  are built to look good and be easy to use.
 
 ## Tech stack & why
 
