@@ -94,6 +94,7 @@ you can demo the full flow immediately.
 npm run build   # production build
 npm run start   # serve the production build
 npm run lint    # eslint
+npm test        # vitest — validation, sanitization, and endpoint tests
 ```
 
 ### Environment variables
@@ -183,9 +184,9 @@ would have missed the review findings below.
    `next@14.2.15`, which npm flagged with a security advisory. Running `npm audit`
    surfaced more across the tree, so I upgraded to **Next 15 + React 19**, bumped
    `@supabase/supabase-js` to a patched release, and used npm `overrides` to force
-   patched `postcss` and `sharp` transitively — taking the audit from **6 high to
-   0 vulnerabilities**, verified with the endpoint tests still green. (A
-   known-vulnerable dependency is exactly what a reviewer greps for.)
+   patched `postcss` and `sharp` transitively — taking the **production** audit
+   (`npm audit --omit=dev`) from **6 high to 0**, verified with the Vitest suite
+   still green. (A known-vulnerable dependency is exactly what a reviewer greps for.)
 
 4. **Nit, caught in review:** an invalid Tailwind class (`h-4.5`, which isn't in
    the default scale) slipped in and would have silently rendered nothing.
@@ -217,6 +218,25 @@ the [Security](#security) section.
 
 ---
 
+## Testing
+
+A small but real **Vitest** suite (`tests/`) locks down the security-critical paths —
+run it with `npm test` (**29 tests, all green**):
+
+- **`validation.test.ts`** — the shared Zod schema: normalization (email lowercased +
+  trimmed, optional `dietary` defaulting) and rejection of bad names, emails, phones, and
+  too-short / too-long free-text.
+- **`sanitize.test.ts`** — `sanitizeFreeText` strips tags, stray angle brackets, and
+  control chars while preserving newlines/tabs; plus `escapeHtml` and the CSV
+  formula-injection guard.
+- **`route.test.ts`** — `POST /api/signup` end-to-end: 200 on valid, 415 non-JSON, 403
+  CSRF/cross-origin, **400 on a non-object body** (the `null`-body 500 the GPT review
+  caught), 400 with field errors, silent-200 honeypot, 413 oversize, and **429**
+  rate-limiting a burst.
+
+These are the paths where a regression would actually hurt (validation, sanitization,
+abuse controls), so they're what I chose to cover first rather than chasing line coverage.
+
 ## Security
 
 This form collects real PII, including emergency contacts, so it's built to be
@@ -234,7 +254,7 @@ read by a security reviewer.
 | **Spam / abuse** | Honeypot field (silent 200), per-IP fixed-window rate limit, optional Turnstile. Body-size guard (Content-Length + true UTF-8 byte length ≤ 16 KB). Non-JSON rejected early. |
 | **PII exposure** | Success response is `{ ok: true }` — no echo. Logs contain only a timestamp + trip slug, never field values. No PII in URLs or client console. |
 | **Transport / clickjacking / sniffing** | HSTS, `X-Frame-Options: DENY` + `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, a tight `Permissions-Policy`, and a Content-Security-Policy — all in `next.config.js`. `X-Powered-By` removed. |
-| **Vulnerable dependencies (supply chain)** | Ran `npm audit`; upgraded Next 14→15 + React 19, patched Supabase, and pinned patched `postcss`/`sharp` via npm `overrides`. Audit is clean: **0 vulnerabilities**. |
+| **Vulnerable dependencies (supply chain)** | Ran `npm audit`; upgraded Next 14→15 + React 19, patched Supabase, and pinned patched `postcss`/`sharp` via npm `overrides`. **The production tree is clean — `npm audit --omit=dev` reports 0 vulnerabilities**, and `vite`/`vitest`/`esbuild` never appear in the shipped bundle. The only `npm audit` findings are **dev-only** advisories in the Vitest/Vite test toolchain (dev-server / Vitest-UI features that `vitest run` doesn't use), which don't reach production. |
 | **Spreadsheet formula injection** | `escapeCsvField` is provided for any future CSV/XLSX export of submissions (leading `= + - @` get quoted). |
 
 ### What I'd harden next (with more time)
