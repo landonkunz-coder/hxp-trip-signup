@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Trip } from "@/data/trip";
 import { FIELD_ORDER, validateField, type SignupInput } from "@/lib/validation";
-import { evaluateEligibility, guardianConsentErrors } from "@/lib/eligibility";
+import { evaluateEligibility, guardianConsentErrors, ineligibleSuggestion } from "@/lib/eligibility";
 import { modeCopy } from "@/lib/tripMode";
 import { CheckIcon, ShieldIcon, SpinnerIcon, ArrowIcon } from "@/components/Icons";
 import { TurnstileWidget } from "@/components/TurnstileWidget";
@@ -190,9 +190,10 @@ export function SignupForm({ trip }: { trip: Trip }) {
     }
   };
 
-  // ---- Ineligible state (shippable, kind) ----------------------------------
+  // ---- Ineligible state (shippable, kind, with a tailored path forward) ----
   if (status === "ineligible") {
     const tooYoung = ineligibleReason === "too_young";
+    const suggestion = ineligibleSuggestion(ineligibleReason ?? elig.status, elig.ageAtDeparture);
     return (
       <div
         role="status"
@@ -207,21 +208,45 @@ export function SignupForm({ trip }: { trip: Trip }) {
           Thanks for your interest in HXP
         </h3>
         <p className="mx-auto mt-3 max-w-md text-pretty text-ink/75">
-          This expedition is open to Builders who are <strong>16–19 years old on the departure
-          date</strong>. Based on the date of birth you entered, {tooYoung ? "you're not quite there yet" : "you're just outside the range for this trip"}.
+          This expedition is for Builders who are <strong>16–19 years old on the departure
+          date</strong>. Based on the date of birth you entered, {tooYoung ? "you're not quite there yet" : "you're just outside the range for this one"}.
         </p>
         <p className="mx-auto mt-3 max-w-md text-pretty text-ink/75">
-          {tooYoung
-            ? "We'd love to have you on a future trip when you're eligible — reach out and we'll keep you posted."
-            : "HXP runs other expeditions and service opportunities — reach out and we'll help you find a fit."}
+          {suggestion === "trip_leader"
+            ? "But you're right in the range to help lead one — HXP Trip Leaders are typically 21–30. Take a look and apply."
+            : suggestion === "domestic"
+              ? "You're almost there — HXP also runs domestic trips that are a great fit for Builders your age, and a great way to start."
+              : tooYoung
+                ? "We'd love to have you on a future trip when you're eligible — reach out and we'll keep you posted."
+                : "HXP runs other expeditions and service opportunities — reach out and we'll help you find a fit."}
         </p>
         <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <a
-            href="mailto:info@hxp.org?subject=Interest%20in%20HXP%20expeditions"
-            className="btn-chunky focus:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            Email HXP
-          </a>
+          {suggestion === "trip_leader" ? (
+            <a
+              href="https://hxp.org/trip-leaders/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-chunky focus:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            >
+              Apply to be a Trip Leader
+            </a>
+          ) : suggestion === "domestic" ? (
+            <a
+              href="https://hxp.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-chunky focus:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            >
+              Explore HXP trips
+            </a>
+          ) : (
+            <a
+              href="mailto:info@hxp.org?subject=Interest%20in%20HXP%20expeditions"
+              className="btn-chunky focus:outline-none focus-visible:ring-2 focus-visible:ring-brick focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            >
+              Email HXP
+            </a>
+          )}
           <button
             type="button"
             onClick={() => {

@@ -90,6 +90,24 @@ export function evaluateEligibility(dobInput: unknown, departureISO: string): El
   return { status: "eligible", eligible: true, isMinor, ageAtDeparture: age };
 }
 
+export type IneligibleSuggestion = "trip_leader" | "domestic" | "none";
+
+/**
+ * For an ineligible applicant, point them at a real alternative:
+ *   • too old & 21–30  → apply to be a Trip Leader
+ *   • too young & 14–15 → a domestic trip (16+ is already eligible for this trip)
+ * Everything else gets the generic "reach out" path.
+ */
+export function ineligibleSuggestion(
+  status: EligibilityStatus,
+  age: number | null,
+): IneligibleSuggestion {
+  if (age == null) return "none";
+  if (status === "too_old" && age >= 21 && age <= 30) return "trip_leader";
+  if (status === "too_young" && age >= 14) return "domestic";
+  return "none";
+}
+
 function isEmailish(v: string): boolean {
   // Intentionally simple; the Zod schema does the authoritative email check.
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);

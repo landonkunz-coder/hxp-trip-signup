@@ -4,6 +4,7 @@ import {
   ageOnDate,
   evaluateEligibility,
   guardianConsentErrors,
+  ineligibleSuggestion,
 } from "@/lib/eligibility";
 
 const DEPART = "2027-02-06"; // the trip's departure date
@@ -117,5 +118,28 @@ describe("guardianConsentErrors", () => {
   it("rejects an invalid guardian email", () => {
     const e = guardianConsentErrors({ isMinor: true, guardianName: "Dana", guardianEmail: "nope" });
     expect(e.guardianEmail).toBeTruthy();
+  });
+});
+
+describe("ineligibleSuggestion (tailored redirects)", () => {
+  it("suggests Trip Leader for 21–30 who are too old", () => {
+    expect(ineligibleSuggestion("too_old", 21)).toBe("trip_leader");
+    expect(ineligibleSuggestion("too_old", 25)).toBe("trip_leader");
+    expect(ineligibleSuggestion("too_old", 30)).toBe("trip_leader");
+  });
+  it("does NOT suggest Trip Leader for 20 or 31+", () => {
+    expect(ineligibleSuggestion("too_old", 20)).toBe("none");
+    expect(ineligibleSuggestion("too_old", 31)).toBe("none");
+  });
+  it("suggests a domestic trip for 14–15 who are too young", () => {
+    expect(ineligibleSuggestion("too_young", 14)).toBe("domestic");
+    expect(ineligibleSuggestion("too_young", 15)).toBe("domestic");
+  });
+  it("does NOT suggest domestic for under 14", () => {
+    expect(ineligibleSuggestion("too_young", 13)).toBe("none");
+  });
+  it("returns none for eligible or null age", () => {
+    expect(ineligibleSuggestion("eligible", 17)).toBe("none");
+    expect(ineligibleSuggestion("too_old", null)).toBe("none");
   });
 });
