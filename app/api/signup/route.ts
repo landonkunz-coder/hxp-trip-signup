@@ -5,6 +5,7 @@ import { rateLimit } from "@/lib/rateLimit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import { saveSubmission } from "@/lib/persistence";
 import { getFeaturedTrip } from "@/data/trip";
+import { evaluateEligibility, guardianConsentErrors } from "@/lib/eligibility";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -134,18 +135,49 @@ export async function POST(req: NextRequest) {
     return json({ ok: false, error: "validation", fieldErrors }, 400);
   }
 
+  const trip = getFeaturedTrip();
+
+  // 7b) Eligibility — AUTHORITATIVE. Age is measured on the trip's DEPARTURE
+  //     date, not the sign-up date. "Ineligible" is a business outcome, not a
+  //     malformed request, so it gets its own response the UI renders kindly.
+  const elig = evaluateEligibility(parsed.data.dateOfBirth, trip.startDate);
+  if (elig.status === "invalid_dob") {
+    return json(
+      { ok: false, error: "validation", fieldErrors: { dateOfBirth: "Enter a valid date of birth." } },
+      400,
+    );
+  }
+  if (!elig.eligible) {
+    return json({ ok: false, error: "ineligible", reason: elig.status }, 422);
+  }
+
+  // 7c) Minor consent — parent/guardian name + email required for under-18s
+  //     (measured on departure); the guardian can't be the applicant.
+  const guardianErrors = guardianConsentErrors({
+    isMinor: elig.isMinor,
+    guardianName: parsed.data.guardianName,
+    guardianEmail: parsed.data.guardianEmail,
+    applicantEmail: parsed.data.email,
+  });
+  if (Object.keys(guardianErrors).length > 0) {
+    return json({ ok: false, error: "validation", fieldErrors: guardianErrors }, 400);
+  }
+
   // 8) Sanitize free-text before it is ever stored/rendered.
   const clean = {
     ...parsed.data,
     dietary: sanitizeFreeText(parsed.data.dietary ?? ""),
     reason: sanitizeFreeText(parsed.data.reason),
+    // Keep guardian info only for minors (who require it); drop it otherwise.
+    guardianName: elig.isMinor ? parsed.data.guardianName ?? "" : "",
+    guardianEmail: elig.isMinor ? parsed.data.guardianEmail ?? "" : "",
   };
 
   // 9) Persist (parameterized client) — or dev fallback if no DB configured.
   try {
     await saveSubmission({
       ...clean,
-      tripSlug: getFeaturedTrip().slug,
+      tripSlug: trip.slug,
       submittedAt: new Date().toISOString(),
     });
   } catch {

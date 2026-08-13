@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseCalendarDate } from "./eligibility";
 
 // =============================================================================
 // SINGLE SOURCE OF TRUTH for field validation.
@@ -25,8 +26,32 @@ const phoneField = (label: string) =>
     .regex(/^[0-9+().\-\s]+$/, `Use digits and + ( ) - . only.`)
     .refine((v) => v.replace(/\D/g, "").length >= 7, `Please enter a valid ${label}.`);
 
+// Date of birth: strict YYYY-MM-DD that must be a real calendar date. The
+// age-range/eligibility decision lives in lib/eligibility.ts (it needs the
+// trip's departure date); this only guarantees the value is a valid date.
+const dobField = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Enter your date of birth as YYYY-MM-DD.")
+  .refine((v) => parseCalendarDate(v) !== null, "That date doesn't exist.");
+
+const guardianNameField = z
+  .string()
+  .trim()
+  .min(2, "Enter the parent/guardian's full name.")
+  .max(80, "That name is too long.")
+  .regex(/^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u, "Use letters, spaces, and - . ' only.");
+
+const guardianEmailField = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email("Enter a valid parent/guardian email.")
+  .max(254, "That email is too long.");
+
 export const signupSchema = z.object({
   fullName: nameField("full name"),
+  dateOfBirth: dobField,
   email: z
     .string()
     .trim()
@@ -37,6 +62,11 @@ export const signupSchema = z.object({
   phone: phoneField("phone number"),
   emergencyName: nameField("emergency contact name"),
   emergencyPhone: phoneField("emergency contact phone"),
+  // Guardian fields are optional at the schema level (adults don't need them);
+  // they become REQUIRED for minors via guardianConsentErrors() on both client
+  // and server. If provided, they must be well-formed.
+  guardianName: z.union([z.literal(""), guardianNameField]).optional(),
+  guardianEmail: z.union([z.literal(""), guardianEmailField]).optional(),
   dietary: z
     .string()
     .trim()
@@ -55,9 +85,12 @@ export type SignupInput = z.infer<typeof signupSchema>;
 export const FIELD_ORDER: (keyof SignupInput)[] = [
   "fullName",
   "email",
+  "dateOfBirth",
   "phone",
   "emergencyName",
   "emergencyPhone",
+  "guardianName",
+  "guardianEmail",
   "dietary",
   "reason",
 ];

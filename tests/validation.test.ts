@@ -4,6 +4,7 @@ import { signupSchema, validateField } from "@/lib/validation";
 const valid = {
   fullName: "María O'Brien-Smith",
   email: "  Test@Example.COM ",
+  dateOfBirth: "2008-06-15",
   phone: "+1 (555) 123-4567",
   emergencyName: "Jordan Lee",
   emergencyPhone: "555-987-6543",
@@ -78,5 +79,27 @@ describe("validateField (client-side, same schema)", () => {
     const msg = validateField("email", "nope");
     expect(typeof msg).toBe("string");
     expect(msg).toBeTruthy();
+  });
+});
+
+describe("dateOfBirth + guardian fields (schema-level)", () => {
+  it("requires a date of birth", () => {
+    const { dateOfBirth, ...rest } = valid;
+    void dateOfBirth;
+    expect(signupSchema.safeParse(rest).success).toBe(false);
+  });
+  it("rejects a rollover date (Feb 31)", () => {
+    expect(signupSchema.safeParse({ ...valid, dateOfBirth: "2010-02-31" }).success).toBe(false);
+  });
+  it("rejects a wrong-shaped date", () => {
+    expect(signupSchema.safeParse({ ...valid, dateOfBirth: "06/15/2008" }).success).toBe(false);
+  });
+  it("allows guardian fields to be omitted (conditionally required elsewhere)", () => {
+    expect(signupSchema.safeParse(valid).success).toBe(true);
+  });
+  it("rejects a malformed guardian email when provided", () => {
+    expect(
+      signupSchema.safeParse({ ...valid, guardianName: "Dana Rivera", guardianEmail: "nope" }).success,
+    ).toBe(false);
   });
 });
