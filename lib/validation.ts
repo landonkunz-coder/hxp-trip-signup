@@ -32,8 +32,8 @@ const phoneField = (label: string) =>
 const dobField = z
   .string()
   .trim()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Enter your date of birth as YYYY-MM-DD.")
-  .refine((v) => parseCalendarDate(v) !== null, "That date doesn't exist.");
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Please enter a valid date of birth.")
+  .refine((v) => parseCalendarDate(v) !== null, "That date doesn't exist — check the day and month.");
 
 const guardianNameField = z
   .string()
